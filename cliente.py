@@ -31,6 +31,8 @@ nome_exchange = argv[1]
 # declarando uma exchange caso nao exista, com o nome acima, do tipo fanout
 canal.exchange_declare(exchange=nome_exchange, exchange_type='fanout')
 
+print(f'utilizando exchange [{nome_exchange}]...')
+
 msg = ""
 while msg != "fim":
     severidade = 0
