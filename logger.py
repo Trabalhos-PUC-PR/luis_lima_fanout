@@ -73,6 +73,7 @@ nome_queue = result.method.queue
 # atribuindo a fila ao exchange
 canal.queue_bind(exchange=nome_exchange, queue=nome_queue)
 
+print(f'utilizando exchange {nome_exchange}...')
 print(f'ouvindo na fila {nome_queue}...')
 
 # publica o canal, usa o exchange especificado
