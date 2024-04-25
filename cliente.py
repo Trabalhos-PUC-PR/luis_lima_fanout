@@ -25,23 +25,33 @@ conexao = BlockingConnection()
 # channel
 canal = conexao.channel()
 
+# recebendo o nome do exchange
 nome_exchange = argv[1]
 
-# cria uma fila caso não exista, garante que vai ter uma fila
+# declarando uma exchange caso nao exista, com o nome acima, do tipo fanout
 canal.exchange_declare(exchange=nome_exchange, exchange_type='fanout')
 
 msg = ""
 while msg != "fim":
+    severidade = 0
+    isMsg = False
+    msg = input("Mensagem(verbose:[on/off]): ")
 
-    sevInt = int(input("Severidade: ((1)DEBUG|(2)INFO|(3)WARNING|(4)ERROR|(5)CRITICAL) "))
-    msg = input("Mensagem: ")
-    severidade = getSeveridade(sevInt)
+    if(msg.split(':')[0] != 'verbose'):
+        isMsg = True
+        sevInt = int(input("Severidade: ((1)DEBUG|(2)INFO|(3)WARNING|(4)ERROR|(5)CRITICAL) "))
+        severidade = getSeveridade(sevInt)
 
-    if(not(severidade == None)):
+    if(severidade != None):
+        if(isMsg):
+            msgBody = f"{time.time()}:{os.getpid()}:{severidade}:{msg}"
+        else:
+            msgBody = msg
+
         canal.basic_publish(
                 exchange=nome_exchange,
                 routing_key="",
-                body=f"{time.time()}:{os.getpid()}:{severidade}:{msg}")
+                body=msgBody)
 
     else:
         print("Severidade invalida!")

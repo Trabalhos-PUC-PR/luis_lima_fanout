@@ -25,19 +25,23 @@ def callback(channel, method, properties, body):
     global verbose
     msg = body.decode()
     splits = msg.split(':')
+
     # ts:sev:pid:comment
     if(len(splits) == 4):
-        if(verbose and (validaSeveridade(splits[2]) != None)):
-            print(f'{splits[0]}|pid:{splits[1]}|{splits[2]}: {splits[3]}')
-            return
+        if(verbose):
+            if(validaSeveridade(splits[2]) != None):
+                print(f'[{splits[2]}] {splits[0]}|pid:{splits[1]}: {splits[3]}')
+                return
+            else:
+                print('severidade invalida!')
+                return
         else:
-            print('severidade invalida!')
             return
 
     # verbose:on/off
     elif(len(splits) == 2):
         if (not(splits[0]=='verbose')):
-            print('body invalido!')
+            print('body do verbose invalido!')
             return
         if(splits[1] == 'on'):
             verbose = True
@@ -56,16 +60,22 @@ conexao = BlockingConnection()
 # channel
 canal = conexao.channel()
 
+# recebendo o nome da exchange
 nome_exchange = argv[1]
 
+# declarando uma exchange caso nao exista, com o nome acima, do tipo fanout
 canal.exchange_declare(exchange=nome_exchange, exchange_type='fanout')
 
+# criando uma fila de nome aleatório, que sera excluida na finalização desse processo
 result = canal.queue_declare(queue='', exclusive=True)
 nome_queue = result.method.queue
+
+# atribuindo a fila ao exchange
 canal.queue_bind(exchange=nome_exchange, queue=nome_queue)
 
 print(f'ouvindo na fila {nome_queue}...')
-# publica o canal, usa o exchange padrão, routing key
+
+# publica o canal, usa o exchange especificado
 canal.basic_consume(
         queue=nome_queue,
         on_message_callback=callback,
