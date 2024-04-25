@@ -25,21 +25,24 @@ conexao = BlockingConnection()
 # channel
 canal = conexao.channel()
 
-nome_chave = argv[1]
+nome_exchange = argv[1]
 
 # cria uma fila caso não exista, garante que vai ter uma fila
-canal.queue_declare(queue=nome_chave, auto_delete=True)
+canal.exchange_declare(exchange=nome_exchange, exchange_type='fanout')
 
 msg = ""
 while msg != "fim":
+
     sevInt = int(input("Severidade: ((1)DEBUG|(2)INFO|(3)WARNING|(4)ERROR|(5)CRITICAL) "))
     msg = input("Mensagem: ")
     severidade = getSeveridade(sevInt)
+
     if(not(severidade == None)):
         canal.basic_publish(
-                exchange="",
-                routing_key=nome_chave,
+                exchange=nome_exchange,
+                routing_key="",
                 body=f"{time.time()}:{os.getpid()}:{severidade}:{msg}")
+
     else:
         print("Severidade invalida!")
 
